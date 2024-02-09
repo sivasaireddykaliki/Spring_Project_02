@@ -27,9 +27,18 @@ public class ProductServiceImpl implements ProductService{
 
     // get the list of products
     @Override
-    public List<Product> fetchProductList() {
+    public ResponseEntity<List<Product>> fetchProductList() {
 
-        return (List<Product>) productRepository.findAll();
+        List<Product> products =  productRepository.findAll();
+
+        if(products == null)
+        {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        else{
+            return new ResponseEntity<>(products,HttpStatus.OK);
+        }
     }
 
     // update the products
@@ -62,4 +71,42 @@ public class ProductServiceImpl implements ProductService{
 
         productRepository.deleteById(productId);
     }
+
+    // find list of products by manufacturer
+    @Override
+    public ResponseEntity<List<Product>> fetchProductListByManufacturer(String manufacturer) {
+
+        List<Product> products = productRepository.findByManufacturerContaining(manufacturer);
+
+        if(products == null)
+        {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        else
+        {
+            return new ResponseEntity<>(products,HttpStatus.OK);
+        }
+    }
+
+    // find list of products by name
+    @Override
+    public ResponseEntity<List<Product>> fetchProductListByName(String name) {
+
+
+        List<Product> products = productRepository.findByNameContaining(name);
+
+        if(products == null)
+        {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        else
+        {
+            return new ResponseEntity<>(products,HttpStatus.OK);
+        }
+
+    }
+
+
 }
