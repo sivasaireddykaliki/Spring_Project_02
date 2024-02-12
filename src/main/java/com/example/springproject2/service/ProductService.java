@@ -11,7 +11,7 @@ public interface ProductService {
     Product saveProduct(Product product);
 
     // Read operation
-    ResponseEntity<List<Product>> fetchProductList();
+    ResponseEntity<Product[]> fetchProductList();
 
 
     //Update operation by Id
@@ -21,8 +21,8 @@ public interface ProductService {
     void deleteProductById(Long productId);
 
     // read operation by manufacturer
-    ResponseEntity<List<Product>> fetchProductListByManufacturer(String manufacturer);
+    ResponseEntity<Product[]> fetchProductListByManufacturer(String manufacturer);
 
     // read operation by name
-    ResponseEntity<List<Product>> fetchProductListByName(String name);
+    ResponseEntity<Product[]>  fetchProductListByName(String name);
 }

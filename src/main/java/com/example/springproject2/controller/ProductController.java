@@ -6,6 +6,7 @@ import com.example.springproject2.service.ProductService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.spi.LoggerRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @RestController
@@ -40,7 +42,9 @@ public class ProductController {
       logger.info("Product saved");
       return new ResponseEntity<>(product_, HttpStatus.OK);
 
-    }catch (Exception e){
+    }
+
+    catch (Exception e){
 
       logger.error("Product not saved");
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -73,40 +77,72 @@ public class ProductController {
 
   // Read operation
   @GetMapping("/products")
-  public ResponseEntity<List<Product>> getproducts(HttpServletRequest request)
+  public ResponseEntity<Product[]> getproducts(HttpServletRequest request)
   {
 
-      // assuming we pass only 1 parameter. Either manufacturer or name.
-      // First access paramter name.
+      try {
 
-      Set<String> parameterNames=request.getParameterMap().keySet(); // returns set of parameter names. Here we have only 1 parameter
-      String parameterName = parameterNames.stream().findFirst().orElse(null);
+          logger.info("Performing Read Operation: Controller Layer");
 
-      // if request object has no parameters
-      if(parameterName==null)
-      {
-      // execute query to return all products without conditions
+          // assuming we pass only 1 parameter. Either manufacturer or name.
+          // First access paramter name.
 
-      return productService.fetchProductList();
+          Set<String> parameterNames=request.getParameterMap().keySet(); // returns set of parameter names. Here we have only 1 parameter
+          String parameterName = parameterNames.stream().findFirst().orElse(null);
+
+          // if request object has no parameters
+          if(parameterName==null)
+          {
+          // execute query to return all products without conditions
+
+              return productService.fetchProductList();
+          }
+
+          else {
+
+              if (parameterName.equalsIgnoreCase("manufacturer")) {
+
+                  return productService.fetchProductListByManufacturer(request.getParameter(parameterName));
+              }
+              else if (parameterName.equalsIgnoreCase("name"))
+              {
+
+                  return productService.fetchProductListByName(request.getParameter(parameterName));
+
+              }
+
+              // bad request
+              else {
+                  return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+              }
+          }
       }
 
-      else {
+      catch (Exception e) {
 
-          if (parameterName.equalsIgnoreCase("manufacturer")) {
+          logger.error("Read Operation Unsuccessful");
+          return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+  }
 
-              return productService.fetchProductListByManufacturer(request.getParameter(parameterName));
-          }
-          else if (parameterName.equalsIgnoreCase("name"))
+  // Read User by Id
+  @GetMapping("/products/{id}")
+  public ResponseEntity<Product> getProductById(@PathVariable("id") long productId)
+  {
+      try{
+          Optional<Product> product_ = productRepository.findById(productId);
+          if(product_.isPresent())
           {
-
-              return productService.fetchProductListByName(request.getParameter(parameterName));
-
+              Product product=product_.get();
+              return new ResponseEntity<>(product,HttpStatus.OK);
           }
-
-          // bad request
           else {
-              return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+              throw new Exception();
           }
+      }
+      catch (Exception e)
+      {
+          return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
       }
   }
 
@@ -114,7 +150,14 @@ public class ProductController {
   @PutMapping("/products/{id}")
   public ResponseEntity<Product> updateProduct(@RequestBody Product product,@PathVariable("id") long productId)
   {
-    return productService.updateProduct(product,productId);
+      try {
+          logger.info("Performing Update Operation: Controller Layer");
+          return productService.updateProduct(product,productId);
+      }
+      catch (Exception e) {
+          logger.error("Update Operation Unsuccessful");
+          return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+      }
 
   }
 
@@ -122,8 +165,16 @@ public class ProductController {
   @DeleteMapping("/products/{id}")
     public ResponseEntity<HttpStatus> deleteProductById(@PathVariable("id") long productId)
     {
-        productService.deleteProductById(productId);
+        try {
+            logger.info("Performing Delete Operation: Controller Layer");
+            productService.deleteProductById(productId);
+            logger.info("Delete Operation Successful");
 
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        catch (Exception e) {
+            logger.error("Delete Operation Unsuccessful");
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

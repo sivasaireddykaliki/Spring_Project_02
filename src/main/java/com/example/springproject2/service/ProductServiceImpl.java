@@ -27,16 +27,17 @@ public class ProductServiceImpl implements ProductService{
 
     // get the list of products
     @Override
-    public ResponseEntity<List<Product>> fetchProductList() {
+    public ResponseEntity<Product[]> fetchProductList() {
 
-        List<Product> products =  productRepository.findAll();
+        List<Product> products_ =  productRepository.findAll();
 
-        if(products == null)
+        if(products_ == null)
         {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
         else{
+            Product[] products=products_.toArray(new Product[0]);
             return new ResponseEntity<>(products,HttpStatus.OK);
         }
     }
@@ -74,35 +75,37 @@ public class ProductServiceImpl implements ProductService{
 
     // find list of products by manufacturer
     @Override
-    public ResponseEntity<List<Product>> fetchProductListByManufacturer(String manufacturer) {
+    public ResponseEntity<Product[]> fetchProductListByManufacturer(String manufacturer) {
 
-        List<Product> products = productRepository.findByManufacturerContaining(manufacturer);
+        List<Product> products_ = productRepository.findByManufacturerContaining(manufacturer);
 
-        if(products == null)
+        if(products_ == null)
         {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
         else
         {
+            Product[] products=products_.toArray(new Product[0]);
             return new ResponseEntity<>(products,HttpStatus.OK);
         }
     }
 
     // find list of products by name
     @Override
-    public ResponseEntity<List<Product>> fetchProductListByName(String name) {
+    public ResponseEntity<Product[]>  fetchProductListByName(String name) {
 
 
-        List<Product> products = productRepository.findByNameContaining(name);
+        List<Product> products_ = productRepository.findByNameContaining(name);
 
-        if(products == null)
+        if(products_ == null)
         {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
         else
         {
+            Product[] products=products_.toArray(new Product[0]);
             return new ResponseEntity<>(products,HttpStatus.OK);
         }
 
