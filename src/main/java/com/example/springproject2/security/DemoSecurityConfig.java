@@ -1,6 +1,7 @@
 package com.example.springproject2.security;
 
 import com.example.springproject2.config.JwtAuthenticationFilter;
+import com.example.springproject2.entity.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,11 +25,21 @@ public class DemoSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
 
+        /*
+
+            admin  = get,put
+            manager= evrything
+            principal = get,post
+            employee = get
+         */
         http.authorizeHttpRequests(
                 auth -> auth
                         .requestMatchers(HttpMethod.POST,"/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/api/products").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/products").hasAnyRole(Role.MANAGER.name(),Role.PRINCIPAL.name(),Role.ADMIN.name(),Role.EMPLOYEE.name())
+                        .requestMatchers(HttpMethod.GET,"/api/products/**").hasAnyRole(Role.MANAGER.name(),Role.PRINCIPAL.name(),Role.ADMIN.name(),Role.EMPLOYEE.name())
+                        .requestMatchers(HttpMethod.POST,"/api/products").hasAnyRole(Role.MANAGER.name(),Role.PRINCIPAL.name())
+                        .requestMatchers(HttpMethod.PUT,"/api/products/**").hasAnyRole(Role.MANAGER.name(),Role.ADMIN.name())
+                        .requestMatchers(HttpMethod.DELETE,"/api/products/**").hasAnyRole(Role.MANAGER.name())
                         .anyRequest().authenticated()
         );
 

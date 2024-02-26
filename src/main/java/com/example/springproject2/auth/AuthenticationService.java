@@ -39,6 +39,7 @@ public class AuthenticationService {
                 .lastName(request.getLastName())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .email(request.getEmail())
+                .role(request.getRole())
                 .build();
 
         //save user in user db
